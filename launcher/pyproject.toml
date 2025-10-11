@@ -9,4 +9,4 @@ executables = [
 ]
 
 [tool.cxfreeze.build_exe]
-include_files = ["bootstrap.js", "icon.ico", "install_config.bat"]
+include_files = ["bootstrap.js", "icon.ico", "install_config.bat", "local.json"]

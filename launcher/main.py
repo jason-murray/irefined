@@ -231,11 +231,12 @@ def maybe_create_local_json():
     local_json_path = path.join(IRACING_PATH, "ui", "config", "local.json")
     if not path.exists(local_json_path):
         bat_file_path = find_data_file("install_config.bat")
+        source_json_path = find_data_file("local.json")
         result = windll.shell32.ShellExecuteW(
             None,
             "runas",
             "cmd.exe",
-            " ".join(["/c", bat_file_path, f'"{IRACING_PATH}"']),
+            " ".join(["/c", bat_file_path, f'"{IRACING_PATH}"', f'"{source_json_path}"']),
             None,
             1,
         )

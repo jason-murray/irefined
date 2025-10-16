@@ -3,6 +3,7 @@ use configparser::ini::Ini;
 use std::fs;
 use std::path::{Path, PathBuf};
 use lazy_static::lazy_static;
+use crate::iracing;
 
 lazy_static! {
     pub static ref CONFIG_DIR: PathBuf = dirs::document_dir()
@@ -31,12 +32,26 @@ impl Config {
     /// Load config from INI file, or create default if not exists
     pub fn load() -> Result<Self> {
         if CONFIG_FILE.exists() {
-            Self::from_file(&CONFIG_FILE)
-        } else {
-            let config = Self::default();
-            config.save()?;
-            Ok(config)
+            let config = Self::from_file(&CONFIG_FILE)?;
+
+            // Validate existing config
+            if config.validate() {
+                return Ok(config);
+            }
+
+            // Invalid config, prompt for new path
+            println!("[ERROR] iRacing installation not found at configured path");
         }
+
+        // Create new config
+        let iracing_path = iracing::get_or_prompt()?;
+        let config = Self {
+            iracing_path,
+            port: 9222,
+        };
+        config.save()?;
+
+        Ok(config)
     }
 
     /// Load config from specific INI file

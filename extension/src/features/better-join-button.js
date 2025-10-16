@@ -1,37 +1,31 @@
-import { getFeatureID } from "../helpers/feature-helpers.js";
-import features from "../feature-manager.js";
-import { findProps } from "../helpers/react-resolver.js";
-import { $ } from "select-dom";
-import "./better-join-button.css";
+/**
+ * Better Join Button - Display session type on join button
+ */
 
-const selector = ".css-qlxuh7 .btn-success";
-let persistInterval = 0;
+import features from '../feature-manager.js';
+import { observe } from '../helpers/selector-observer.js';
+import { findProps } from '../helpers/react-resolver.js';
+import { $ } from 'select-dom';
+import './better-join-button.css';
+
+const selector = '.css-qlxuh7 .btn-success';
 
 const userRoles = {
-  0: "Race",
-  2: "Spectate",
-  4: "Spot",
+  0: 'Race',
+  2: 'Spectate',
+  4: 'Spot',
 };
 
-async function init(activate = true) {
-  if (!activate) {
-    clearInterval(persistInterval);
-    return;
-  }
+function init(signal) {
+  observe(selector, (joinBtnEl) => {
+    const joinProps = findProps(joinBtnEl);
 
-  persistInterval = setInterval(() => {
-    let joinBtnEl = $(selector);
-
-    if (joinBtnEl.classList.contains("iref-seen")) {
+    if (!joinProps?.registrationStatus) {
       return;
     }
 
-    joinBtnEl.classList.add("iref-seen");
-
-    const joinProps = findProps(joinBtnEl);
-
-    let label1 = "";
-    let label2 = "";
+    let label1 = '';
+    let label2 = '';
 
     if (joinProps.registrationStatus.user_role !== 0) {
       if (userRoles[joinProps.registrationStatus.user_role] !== undefined) {
@@ -39,21 +33,21 @@ async function init(activate = true) {
       }
     } else {
       if (joinProps.registrationStatus.event_type === 5) {
-        label1 = "Race";
+        label1 = 'Race';
       } else {
-        label1 = "Practice";
+        label1 = 'Practice';
       }
 
       if (joinProps.registrationStatus.will_be_scored) {
-        label2 = "";
+        label2 = '';
       } else {
-        label2 = " (Unscored)";
+        label2 = ' (Unscored)';
       }
     }
 
-    //joinBtnEl.innerHTML = label1 == "Race" ? label1 + label2 : label1;
     joinBtnEl.innerHTML = label1;
 
+    // Update series label if available
     const joinSeriesLabel =
       window.irefIndex &&
       joinProps.registrationStatus.season_id in window.irefIndex
@@ -61,12 +55,14 @@ async function init(activate = true) {
         : false;
 
     if (joinSeriesLabel) {
-      $(".chakra-text.css-1ap4k1m").innerText = joinSeriesLabel;
+      const seriesLabelEl = $('.chakra-text.css-1ap4k1m');
+      if (seriesLabelEl) {
+        seriesLabelEl.innerText = joinSeriesLabel;
+      }
     }
-  }, 300);
+  }, { signal });
 }
 
-const id = getFeatureID(import.meta.url);
-const bodyClass = "iref-" + id;
-
-features.add(id, true, selector, bodyClass, init);
+void features.add('better-join-button', {
+  init
+});

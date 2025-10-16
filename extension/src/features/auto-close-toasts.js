@@ -1,33 +1,39 @@
-import { getFeatureID } from "../helpers/feature-helpers.js";
-import features from "../feature-manager.js";
-import { $ } from "select-dom";
-import { log } from "./logger.js";
+/**
+ * Auto Close Toasts - Automatically close notification toasts after timeout
+ */
 
-const selector = '.chakra-toast button[aria-label="Close"]:not(.iref-seen)';
+import features from '../feature-manager.js';
+import { observe } from '../helpers/selector-observer.js';
+import { log } from './logger.js';
 
-async function init(activate = true) {
-  if (!activate) {
-    return;
-  }
+const selector = '.chakra-toast button[aria-label="Close"]';
 
-  let timeout =
-    JSON.parse(localStorage.getItem("iref_settings"))["toast-timeout-s"] || 5;
+function init(signal) {
+  const settings = JSON.parse(localStorage.getItem('iref_settings') || '{}');
+  const timeout = settings['toast-timeout-s'] || 5;
 
-  let toastEl = $(selector);
+  observe(selector, (toastCloseBtn) => {
+    log(`✖️ Closing toast after ${timeout} seconds`);
 
-  toastEl.classList.add("iref-seen");
+    // Set timeout to click close button
+    const timeoutId = setTimeout(() => {
+      // Find React props and trigger onClick
+      const reactHandler = Object.keys(toastCloseBtn).find((key) =>
+        key.startsWith('__reactProps')
+      );
 
-  log("✖️ Closing toast after " + timeout + " seconds");
+      if (reactHandler && toastCloseBtn[reactHandler]?.onClick) {
+        toastCloseBtn[reactHandler].onClick();
+      }
+    }, timeout * 1000);
 
-  setTimeout(() => {
-    let reactHandler = Object.keys(toastEl).find((key) =>
-      key.startsWith("__reactProps")
-    );
-    toastEl[reactHandler].onClick();
-  }, timeout * 1000);
+    // Cleanup timeout if feature is aborted
+    signal.addEventListener('abort', () => {
+      clearTimeout(timeoutId);
+    });
+  }, { signal });
 }
 
-const id = getFeatureID(import.meta.url);
-const bodyClass = "iref-" + id;
-
-features.add(id, true, selector, bodyClass, init);
+void features.add('auto-close-toasts', {
+  init
+});

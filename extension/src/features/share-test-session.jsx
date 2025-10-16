@@ -1,16 +1,14 @@
-import { getFeatureID } from '../helpers/feature-helpers.js';
 import features from '../feature-manager.js';
+import { observe } from '../helpers/selector-observer.js';
 import { findReact } from '../helpers/react-resolver.js';
 import React from 'dom-chef';
 import { $ } from 'select-dom';
 
 const selector = '#test-drive-modal';
 
-async function initConditions(activate = true) {
-
-    if (!activate) {
-        return;
-    }
+function init(signal) {
+  // Watch for test drive modal appearance
+  observe(selector, (modalEl) => {
 
     const modalState = findReact($(selector), 1, "state");
 
@@ -78,11 +76,10 @@ async function initConditions(activate = true) {
         </div>
     );
 
-    $(selector).querySelector('.modal-footer > .centered-horizontal').prepend(buttonEl);
-
+    modalEl.querySelector('.modal-footer > .centered-horizontal').prepend(buttonEl);
+  }, { signal });
 }
 
-const id = getFeatureID(import.meta.url);
-const bodyClass = 'iref-' + id;
-
-features.add(id, true, selector, bodyClass, initConditions);
+void features.add('share-test-session', {
+  init
+});

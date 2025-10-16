@@ -1,52 +1,66 @@
-import { getFeatureID } from "../helpers/feature-helpers.js";
-import { log } from "./logger.js";
-import features from "../feature-manager.js";
-import { findProps } from "../helpers/react-resolver.js";
-import ws from "../helpers/websockets.js";
-import { $ } from "select-dom";
+/**
+ * Auto Forfeit - Automatically forfeit session after timeout
+ */
 
-const selector = ".css-qlxuh7 .btn-danger";
+import features from '../feature-manager.js';
+import { observe } from '../helpers/selector-observer.js';
+import { findProps } from '../helpers/react-resolver.js';
+import ws from '../helpers/websockets.js';
+import { $ } from 'select-dom';
+import { log } from './logger.js';
 
-let forfeitCheck;
+const selector = '.css-qlxuh7 .btn-danger';
 
-async function init(activate = true) {
-  if (!activate) {
-    return;
-  }
+function init(signal) {
+  const settings = JSON.parse(localStorage.getItem('iref_settings') || '{}');
+  const timeout = settings['auto-forfeit-m'] || 13;
 
-  let timeout =
-    JSON.parse(localStorage.getItem("iref_settings"))["auto-forfeit-m"] || 13;
+  observe(selector, (forfeitBtn) => {
+    const forfeitProps = findProps(forfeitBtn);
 
-  const forfeitProps = findProps($(selector));
-  forfeitCheck = forfeitProps.registrationStatus.subsession_id;
-
-  log(`🛑 Forfeit button seen, beginning ${timeout} minute countdown`);
-
-  setTimeout(() => {
-    const forfeitProps2 = findProps($(selector));
-
-    if (!forfeitProps2) {
-      log("🛑 Forfeit button not available");
+    if (!forfeitProps?.registrationStatus) {
       return;
     }
 
-    if (forfeitProps2.simStatus.status !== "Sim Running") {
-      log("🛑 Sim not running, skipping forfeit");
-      return;
-    }
+    const forfeitCheck = forfeitProps.registrationStatus.subsession_id;
+    log(`🛑 Forfeit button seen, beginning ${timeout} minute countdown`);
 
-    if (forfeitCheck !== forfeitProps2.registrationStatus.subsession_id) {
-      log("🛑 Session changed, skipping forfeit");
-      return;
-    }
+    // Set timeout to forfeit
+    const timeoutId = setTimeout(() => {
+      const forfeitBtn2 = $(selector);
+      if (!forfeitBtn2) {
+        log('🛑 Forfeit button not available');
+        return;
+      }
 
-    log(`🛑 Forfeiting session ${forfeitCheck}`);
+      const forfeitProps2 = findProps(forfeitBtn2);
 
-    ws.withdraw();
-  }, timeout * 1000 * 60);
+      if (!forfeitProps2) {
+        log('🛑 Forfeit button not available');
+        return;
+      }
+
+      if (forfeitProps2.simStatus?.status !== 'Sim Running') {
+        log('🛑 Sim not running, skipping forfeit');
+        return;
+      }
+
+      if (forfeitCheck !== forfeitProps2.registrationStatus.subsession_id) {
+        log('🛑 Session changed, skipping forfeit');
+        return;
+      }
+
+      log(`🛑 Forfeiting session ${forfeitCheck}`);
+      ws.withdraw();
+    }, timeout * 1000 * 60);
+
+    // Cleanup timeout on abort
+    signal.addEventListener('abort', () => {
+      clearTimeout(timeoutId);
+    });
+  }, { signal });
 }
 
-const id = getFeatureID(import.meta.url);
-const bodyClass = "iref-" + id;
-
-features.add(id, true, selector, bodyClass, init);
+void features.add('auto-forfeit', {
+  init
+});

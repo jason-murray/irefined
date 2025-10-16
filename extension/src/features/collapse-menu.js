@@ -1,11 +1,9 @@
-import { getFeatureID } from '../helpers/feature-helpers.js';
+/**
+ * Collapse Menu - Fold sidebar menu to icons only
+ * CSS-only feature
+ */
+
 import features from '../feature-manager.js';
 import './collapse-menu.css';
 
-const id = getFeatureID(import.meta.url);
-
-const selector = '#racing-sidebar';
-
-const bodyClass = 'iref-' + id;
-
-features.add(id, true, selector, bodyClass);
+void features.addCssFeature('collapse-menu');

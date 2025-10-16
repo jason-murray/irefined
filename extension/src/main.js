@@ -1,10 +1,13 @@
 // Setup
 import "./helpers/websockets.js";
 
+// Expose feature manager globally for Vue components
+import features from "./feature-manager.js";
+window.irefFeatures = features;
+
 // Features
-import "./features/status-bar.jsx";
+// Note: status-bar and settings-panel are now Vue components in vue/
 import "./features/logger.js";
-import "./features/settings-panel.jsx";
 import "./features/no-sidebars.js";
 import "./features/no-toasts.js";
 import "./features/collapse-menu.js";

@@ -1,0 +1,49 @@
+/**
+ * iRefined Theme Variables
+ * Responds to iRacing's color-scheme attribute on html element
+ */
+
+/* Default (Dark Mode) */
+/* :root {
+  --iref-bar-highlight: #6120ff;
+  --iref-bg-primary: var(--ir-colors-gray-950);
+  --iref-bg-secondary: #1e1e27;
+  --iref-bg-tertiary: #1a1a1f;
+  --iref-text-primary: #ffffff;
+  --iref-text-secondary: #cccccc;
+  --iref-text-muted: #888888;
+  --iref-border-color: #333333;
+  --iref-border-subtle: #444444;
+  --iref-modal-overlay: rgba(0, 0, 0, 0.8);
+}
+*/
+
+/* Light Mode - when iRacing sets color-scheme: light */
+/* html[style*="color-scheme: light"] {
+  --iref-bar-highlight: #6120ff;
+  --iref-bg-primary: #ffffff;
+  --iref-bg-secondary: #f5f5f5;
+  --iref-bg-tertiary: #fafafa;
+  --iref-text-primary: #000000;
+  --iref-text-secondary: #333333;
+  --iref-text-muted: #666666;
+  --iref-border-color: #e0e0e0;
+  --iref-border-subtle: #cccccc;
+  --iref-modal-overlay: rgba(255, 255, 255, 0.9);
+}  */
+
+/* Support for light-dark() function if available */
+@supports (color: light-dark(white, black)) {
+  :root {
+    --iref-bar-highlight: #6120ff;
+    --iref-bg-primary: light-dark(var(--ir-colors-gray-150), var(--ir-colors-gray-950));
+    --iref-bg-secondary: light-dark(var(--ir-colors-gray-200), var(--ir-colors-gray-1000));
+    --iref-bg-tertiary: light-dark(#fafafa, #1a1a1f);
+    --iref-text-primary: light-dark(#000000, #ffffff);
+    --iref-text-secondary: light-dark(#333333, #cccccc);
+    --iref-text-muted: light-dark(#666666, #888888);
+    --iref-border-color: light-dark(var(--ir-colors-blackAlpha-200), var(--ir-colors-whiteAlpha-100));
+    --iref-border-subtle: light-dark(#cccccc, #444444);
+    --iref-modal-overlay: light-dark(rgba(255, 255, 255, 0.9), rgba(0, 0, 0, 0.8));
+  }
+}

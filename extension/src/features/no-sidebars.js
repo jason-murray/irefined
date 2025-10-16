@@ -1,11 +1,9 @@
-import { getFeatureID } from '../helpers/feature-helpers.js';
+/**
+ * No Sidebars - Hide left and right sidebars for cleaner UI
+ * CSS-only feature
+ */
+
 import features from '../feature-manager.js';
 import './no-sidebars.css';
 
-const id = getFeatureID(import.meta.url);
-
-const selector = '#rightbar';
-
-const bodyClass = 'iref-' + id;
-
-features.add(id, true, selector, bodyClass);
+void features.addCssFeature('no-sidebars');

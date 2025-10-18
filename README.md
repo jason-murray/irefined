@@ -10,6 +10,15 @@
   An unofficial extension for the iRacing UI that adds some quality of life features for drivers everywhere.
 </p>
 
+## Launcher Implementation
+
+The launcher is available in two implementations:
+
+- **Rust** (current): `launcher-rs/` - Modern rewrite with better performance
+- **Python** (deprecated): `launcher/` - Original implementation, will be removed in future
+
+For development, use the Rust version. See `launcher-rs/README.md` for build instructions.
+
 ## 🚀 Features
 
 ### ⏰ Queue for future races (pre reg!)

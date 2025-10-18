@@ -7,14 +7,14 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 iRefined is an unofficial extension for the iRacing UI that adds quality of life features. The project consists of two main components:
 
 1. **Extension** (JavaScript/Vite): A web extension that injects into the iRacing UI (built with React)
-2. **Launcher** (Python): A Windows system tray application that manages the extension injection
+2. **Launcher** (Rust): A Windows system tray application that manages the extension injection
 
 ### Architecture
 
 The extension is injected into the iRacing UI through a Chrome DevTools Protocol (CDP) WebSocket connection. The launcher monitors for the iRacing UI, then injects `bootstrap.js` which loads the extension from GitHub Pages. The extension is served remotely, allowing updates without requiring users to reinstall the launcher.
 
 **Key architectural details:**
-- The launcher (Python) uses CDP to inject JavaScript into the iRacing Chromium-based UI
+- The launcher (Rust) uses CDP to inject JavaScript into the iRacing Chromium-based UI
 - The extension is hosted on GitHub Pages and loaded dynamically
 - Features use a DOM observer pattern to watch for specific UI elements
 - React internal APIs are accessed via the `react-resolver.js` helper to interact with iRacing's React components
@@ -31,12 +31,12 @@ npm run dev                # Development mode with hot reload
 npm run serve              # Serve built extension locally with CORS
 ```
 
-### Launcher (Python)
+### Launcher (Rust)
 ```bash
-cd launcher
-pipenv install             # Install dependencies
-pipenv shell               # Activate virtual environment
-pipenv run cxfreeze build --target-dir=dist  # Build executable
+cd launcher-rs
+cargo build --release      # Build executable
+cargo test                 # Run tests
+cargo run --release        # Run launcher
 ```
 
 ## Project Structure
@@ -51,9 +51,19 @@ pipenv run cxfreeze build --target-dir=dist  # Build executable
   - `feature-helpers.js` - Shared utilities for features
 - `features/` - Individual feature implementations (22 total)
 
-### Launcher (`/launcher/`)
-- `main.py` - System tray app that monitors for iRacing UI and injects extension
-- `bootstrap.js` - Initial injection script that loads remote extension from GitHub Pages
+### Launcher (`/launcher-rs/`)
+- `src/main.rs` - Entry point and main event loop
+- `src/config.rs` - INI file configuration management
+- `src/tray.rs` - Windows system tray icon and menu
+- `src/startup.rs` - Windows startup shortcut management
+- `src/cdp.rs` - Chrome DevTools Protocol client
+- `src/monitor.rs` - WebSocket monitoring and injection loop
+- `src/iracing.rs` - iRacing installation validation
+- `src/local_json.rs` - local.json installer with UAC elevation
+- `src/update.rs` - Velopack update integration
+- `resources/` - Embedded files (bootstrap.js, icon.ico, local.json)
+
+Note: Python launcher in `/launcher/` is deprecated and will be removed in a future release.
 
 ## Feature Development Pattern
 
@@ -113,8 +123,8 @@ Session data is received via `data_services_push` events and stored in `window.i
 - Commit messages starting with `-` trigger Discord notifications
 
 ### Launcher Deployment
-- Create a git tag (e.g., `1.5.4`) to trigger `.github/workflows/launcher.yml`
-- Builds Windows executable with cx_Freeze
+- Create a git tag (e.g., `1.5.4`) to trigger `.github/workflows/launcher-rs.yml`
+- Builds Windows executable with Rust/Cargo
 - Packages with Velopack for auto-updates
 - Publishes release to GitHub
 - Users get updates via the tray menu "Check for Updates"

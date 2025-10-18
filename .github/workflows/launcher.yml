@@ -1,4 +1,9 @@
-name: launcher
+# DEPRECATED: Python launcher workflow
+# Replaced by launcher-rs.yml (Rust implementation)
+# This workflow is disabled but kept for reference
+# To re-enable Python launcher, change: if: false
+
+name: launcher (DEPRECATED)
 
 on: push
 
@@ -9,7 +14,7 @@ concurrency: launcher
 
 jobs:
   build_launcher:
-    if: github.ref_type == 'tag'
+    if: false  # Disabled - using Rust launcher instead
     runs-on: windows-latest
     steps:
       - name: Checkout repo

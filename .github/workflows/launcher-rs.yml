@@ -1,0 +1,66 @@
+name: launcher-rs
+
+on:
+  push:
+    tags:
+      - '*'
+
+permissions:
+  contents: write
+
+concurrency: launcher
+
+jobs:
+  build_launcher:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Cache cargo build
+        uses: actions/cache@v4
+        with:
+          path: launcher-rs/target
+          key: ${{ runner.os }}-cargo-build-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: Build Rust launcher
+        run: cargo build --release
+        working-directory: launcher-rs
+
+      - name: Prepare distribution files
+        run: |
+          mkdir dist
+          copy target\release\irefined-launcher.exe dist\iRefined.exe
+          copy resources\bootstrap.js dist\
+          copy resources\local.json dist\
+        working-directory: launcher-rs
+
+      - name: Install Velopack
+        run: dotnet tool install -g vpk
+
+      - name: Create Velopack Release
+        run: |
+          vpk pack -u iRefined -v ${{ github.ref_name }} -p .\dist -o .\release --noPortable --icon resources\icon.ico
+          vpk upload github -o .\release --repoUrl https://github.com/${{ github.repository }} --publish --releaseName "iRefined Launcher v${{ github.ref_name }}" --tag ${{ github.ref_name }} --token ${{ secrets.GITHUB_TOKEN }}
+        working-directory: launcher-rs
+
+      - name: Discord Webhook Notification
+        uses: tsickert/discord-webhook@v7.0.0
+        with:
+          webhook-url: ${{ secrets.DISCORD_WEBHOOK }}
+          content: |
+            **Launcher v${{ github.ref_name }} released! (Rust version)**
+            Right click iRefined and check updates to get the latest version.
+
+            [Or grab it here!](<https://github.com/jason-murray/irefined/releases/latest/download/iRefined-win-Setup.exe>)

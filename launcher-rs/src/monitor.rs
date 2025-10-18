@@ -29,11 +29,13 @@ impl InjectionMonitor {
             sleep(Duration::from_secs(1)).await;
 
             if let Some(ws_url) = self.cdp.get_websocket_url().await {
-                let seen = self.seen_urls.lock().unwrap();
+                let should_inject = {
+                    let seen = self.seen_urls.lock().unwrap();
+                    !seen.contains(&ws_url)
+                }; // Lock is dropped here
 
-                if !seen.contains(&ws_url) {
+                if should_inject {
                     println!("[INFO] Found new iRacing WebSocket URL: {}", ws_url);
-                    drop(seen); // Release lock before async operation
 
                     match self.cdp.inject_script(&ws_url, js_code).await {
                         Ok(_) => {

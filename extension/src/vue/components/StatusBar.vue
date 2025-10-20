@@ -73,7 +73,7 @@ const queueCount = computed(() => queueStore.queueCount);
 }
 
 .iref-logo {
-  width: 100px;
+  width: 70px;
   background-color: var(--iref-bar-highlight);
   display: flex;
   align-items: center;
@@ -82,7 +82,7 @@ const queueCount = computed(() => queueStore.queueCount);
 }
 
 .iref-logo img {
-  height: 15px;
+  height: 11px;
 }
 
 .iref-bar-left {

@@ -1,3 +1,12 @@
+<div align="center">
+  
+⚠️ **iRefined will stop working in 2026 Season 1** ⚠️
+  
+[More details](https://discord.gg/hxVf8wcGaV)
+</div>
+
+&nbsp;
+
 <p align="center">
   <img width="300" src="https://github.com/jason-murray/irefined/blob/main/extension/src/assets/logo.png?raw=true" alt="iRefined Logo"/>
 </p>

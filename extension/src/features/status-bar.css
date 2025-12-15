@@ -31,7 +31,7 @@
   height: 41px;
   border: 1px solid var(--ir-colors-whiteAlpha-100);
   border-radius: 41px;
-  background: var(--ir-colors-gray-900);
+  background: var(--ir-colors-gray-950);
   color: var(--ir-colors-gray-50);
   box-shadow: rgba(5, 5, 15, 0.16) 0px 12px 24px -2px;
   overflow: hidden;

@@ -1,26 +1,18 @@
 .iref-no-sidebars {
-    #leftbar, #rightbar {
-        display: none;
-    }
+  #leftbar,
+  #rightbar {
+    display: none;
+  }
 
-    #menubar {
-        padding: 0 25px;
-    }
+  #menubar {
+    padding: 0 25px;
+  }
 
-    .css-k7o4yd {
-        width: 100%;
-    }
+  .css-k7o4yd {
+    width: 100%;
+  }
 
-    .css-19qcwgl {
-        padding-bottom: 0px;
-    }
-
-    .css-14anxkw {
-        border-radius: 0;
-    }
-
-    .css-1hyj50e {
-        padding-inline: 15px;
-    }
-
+  .css-1hyj50e {
+    padding-inline: 15px;
+  }
 }

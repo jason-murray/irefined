@@ -17,7 +17,6 @@
   "dependencies": {
     "dom-chef": "^5.1.1",
     "select-dom": "^9.3.0",
-    "socket.io-client": "^4.8.1",
-    "uuid": "^11.1.0"
+    "socket.io-client": "^4.8.1"
   }
 }

@@ -11,6 +11,14 @@ let persistInterval = 0;
 
 window.watchQueue = [];
 
+function formatSeasonName(seasonName) {
+  seasonName = seasonName
+    .replace(/(?:\s*-\s*)?\d{4}\sSeason(?:\s\d+)?/, "")
+    .replace(/Fixed\s(?:-\s)?Fixed/, "Fixed")
+    .replace("Series Series", "Series");
+  return seasonName;
+}
+
 function checkSession(session, queueItem) {
   if (queueItem.status !== "queued") {
     return;
@@ -27,7 +35,9 @@ function checkSession(session, queueItem) {
       session.session_id > 0
     ) {
       log(
-        `📝 Race session for series ${queueItem.season_name}, start time ${isoTime} found`
+        `📝 Race session for series ${formatSeasonName(
+          queueItem.season_name
+        )}, start time ${isoTime} found`
       );
 
       queueItem.session_id = session.session_id;
@@ -45,7 +55,11 @@ export function activateQueueItem(queueIndex) {
 
   queueItem.status = "registering";
 
-  log(`📝 Registering for series ${queueItem.season_name} in 10 seconds...`);
+  log(
+    `📝 Registering for series ${formatSeasonName(
+      queueItem.season_name
+    )} in 10 seconds...`
+  );
 
   ws.withdraw();
 
@@ -55,7 +69,7 @@ export function activateQueueItem(queueIndex) {
     );
 
     ws.register(
-      queueItem.season_name,
+      formatSeasonName(queueItem.season_name),
       queueItem.car_id,
       queueItem.car_class_id,
       queueItem.session_id
@@ -141,7 +155,9 @@ function addToQueue(e) {
     car_id: selectedCar.car_id,
     car_class_id: selectedCar.car_class_id,
     season_id: sessionProps.contentId,
-    season_name: $(".chakra-screen-billboard .chakra-heading").innerText,
+    season_name: formatSeasonName(
+      $(".chakra-screen-billboard .chakra-heading").innerText
+    ),
     start_time: timestamp,
     status: "queued",
   });

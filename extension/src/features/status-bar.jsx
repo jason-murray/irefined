@@ -9,15 +9,15 @@ import logo from "../assets/logo.png";
 const selector = "body";
 
 const barContainerEl = (
-  <div id="iref-bar">
-    <div className="iref-bar-left">
-      <div className="iref-logo">
-        <img src={logo} />
+  <div class="iref-bar-wrapper">
+    <div id="iref-bar">
+      <div className="iref-bar-left">
+        <div className="iref-logo">
+          <img src={logo} />
+        </div>
+        <div className="iref-queue-items"></div>
       </div>
-      <div className="iref-queue-items"></div>
-    </div>
-    <div className="iref-bar-right">
-      <div className="iref-status"></div>
+      <div className="iref-bar-right"></div>
     </div>
   </div>
 );
@@ -85,7 +85,10 @@ setInterval(() => {
             title={tooltipText}
             onClick={() => activateQueueItem(item.originalIndex)}
           ></span>
-          {item.season_name} - {formatCountdown(item.start_time)}
+          <span className="iref-queue-text-fixed">
+            {formatCountdown(item.start_time)}
+          </span>
+          <span> {item.season_name}</span>
           <button
             className="iref-remove-btn"
             onClick={() => {

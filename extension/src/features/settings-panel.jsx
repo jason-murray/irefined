@@ -354,7 +354,7 @@ async function initSettingsPanel(activate = true) {
     </button>
   );
 
-  $("body").appendChild(menuButtonEl);
+  $(".iref-bar-right").appendChild(menuButtonEl);
 
   const plausibleEl = (
     <script

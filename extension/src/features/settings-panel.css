@@ -1,17 +1,3 @@
-.iref-settings-panel {
-  .chakra-button[aria-label="Cart"],
-  .chakra-button[aria-label="Cart"] + div[data-role="count"] {
-    margin-right: 45px;
-  }
-}
-
-.iref-no-sidebars.iref-settings-panel {
-  .chakra-button[aria-label="Cart"],
-  .chakra-button[aria-label="Cart"] + div[data-role="count"] {
-    margin-right: 28px;
-  }
-}
-
 .iref-no-sidebars .iref-toolbar-btn {
   right: 11px;
 }
@@ -23,9 +9,7 @@
   height: 32px;
   width: 32px;
   border-radius: 50%;
-  position: absolute;
-  top: 48px;
-  right: 81px;
+  margin-right: 4px;
 
   svg {
     transform: translateX(5px);
@@ -47,7 +31,7 @@
     display: inline-block;
     width: 35px;
     color: white;
-    background: none;
+    background: var(--ir-colors-gray-900);
     font-size: 16px;
     font-weight: 700;
     margin: 0 6px;
@@ -59,8 +43,8 @@
   select {
     display: inline-block;
     color: white;
-    background: none;
     font-size: 16px;
+    background: var(--ir-colors-gray-900);
     font-weight: 700;
     margin: 0 6px;
     text-align: center;

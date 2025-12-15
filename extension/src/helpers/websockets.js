@@ -1,5 +1,4 @@
 import { io } from "socket.io-client";
-import { v4 } from "uuid";
 import { log } from "../features/logger.js";
 
 let wsInitCheck = setInterval(() => {
@@ -11,6 +10,23 @@ let wsInitCheck = setInterval(() => {
 
 let clientSocket;
 let callbacks = [];
+
+function id() {
+  var t = function () {
+    return Math.floor((1 + Math.random()) * 65536)
+      .toString(16)
+      .substring(1);
+  };
+  return t() + t() + "-" + t() + "-" + t() + "-" + t() + "-" + t() + t() + t();
+}
+
+function formatSeasonName(seasonName) {
+  seasonName = seasonName
+    .replace(/(?:\s*-\s*)?\d{4}\sSeason(?:\s\d+)?/, "")
+    .replace(/Fixed\s(?:-\s)?Fixed/, "Fixed")
+    .replace("Series Series", "Series");
+  return seasonName;
+}
 
 function initWS() {
   const irVersion = SENTRY_RELEASE.id.substring(
@@ -46,7 +62,7 @@ function initWS() {
     authSocket.emit("now");
 
     clientSocket.emit("data_services", {
-      refid: v4(),
+      refid: id(),
       service: "season",
       method: "popular_sessions",
       args: {
@@ -69,7 +85,9 @@ function initWS() {
       window.irefIndex = {};
       try {
         data.data.sessions.forEach((session) => {
-          window.irefIndex[session.season_id] = session.season_name;
+          window.irefIndex[session.season_id] = formatSeasonName(
+            session.season_name
+          );
         });
       } catch {}
     }
@@ -77,7 +95,7 @@ function initWS() {
 }
 
 function send(event, data) {
-  data.refid = v4();
+  data.refid = id();
   clientSocket.emit(event, data);
 }
 

@@ -1,15 +1,15 @@
 .iref-logger {
   #iref-log {
     position: fixed;
-    bottom: 6px;
-    right: 0;
-    background-color: rgba(0, 0, 0, 1);
+    bottom: 18px;
+    right: 54px;
+    background-color: transparent;
     border-top-left-radius: 5px;
     color: #fff;
     padding: 0px 10px;
     z-index: 9010;
-    max-height: 29px;
-    overflow-y: auto;
+    max-height: 20px;
+    overflow-y: hidden;
     scroll-behavior: smooth;
 
     span {
@@ -19,6 +19,7 @@
 
     > div {
       text-align: right;
+      font-size: 12px;
     }
   }
 }
@@ -26,6 +27,7 @@
 .iref-settings-panel-open.iref-logger #iref-log {
   max-height: 200px;
   overflow-y: auto;
+  background-color: #000;
 
   > div {
     text-align: left;

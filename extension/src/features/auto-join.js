@@ -1,65 +1,76 @@
-import { getFeatureID } from "../helpers/feature-helpers.js";
-import { log } from "./logger.js";
-import features from "../feature-manager.js";
-import { findProps } from "../helpers/react-resolver.js";
-import { $ } from "select-dom";
+/**
+ * Auto Join - Automatically click join button for scored race sessions
+ */
 
-const selector = ".css-qlxuh7 .btn-success";
-const regBarSelector = "#scroll > .css-c980m3";
+import features from '../feature-manager.js';
+import { observe } from '../helpers/selector-observer.js';
+import { findProps } from '../helpers/react-resolver.js';
+import { $ } from 'select-dom';
+import { log } from './logger.js';
 
-async function init(activate = true) {
-  if (!activate) {
-    return;
-  }
+const selector = '.css-qlxuh7 .btn-success';
+const regBarSelector = '#scroll > .css-c980m3';
 
-  let type =
-    JSON.parse(localStorage.getItem("iref_settings"))["auto-join-type"] ||
-    "race";
+function init(signal) {
+  const settings = JSON.parse(localStorage.getItem('iref_settings') || '{}');
+  const type = settings['auto-join-type'] || 'race';
 
-  let lastJoined = parseInt(localStorage.getItem("iref_last_joined"));
+  // Watch for join button appearance
+  observe(selector, (joinBtn) => {
+    const lastJoined = parseInt(localStorage.getItem('iref_last_joined') || '0');
+    const joinProps = findProps(joinBtn);
 
-  const joinProps = findProps($(selector));
-
-  if (joinProps.registrationStatus.subsession_id !== lastJoined) {
-    lastJoined = joinProps.registrationStatus.subsession_id;
-    localStorage.setItem("iref_last_joined", lastJoined);
-    if (
-      type !== "race" ||
-      (type === "race" &&
-        joinProps.registrationStatus.event_type === 5 &&
-        joinProps.registrationStatus.will_be_scored)
-    ) {
-      log(`🏁 Auto joining session: ${lastJoined}`);
-      $(selector).click();
-    } else {
-      log(`⛔ Not joining unscored session: ${lastJoined}`);
+    if (!joinProps?.registrationStatus) {
+      return;
     }
-  } else {
-    log(`⛔ Already joined ${lastJoined} once, skipping`);
-  }
+
+    if (joinProps.registrationStatus.subsession_id !== lastJoined) {
+      localStorage.setItem('iref_last_joined', joinProps.registrationStatus.subsession_id);
+
+      if (
+        type !== 'race' ||
+        (type === 'race' &&
+          joinProps.registrationStatus.event_type === 5 &&
+          joinProps.registrationStatus.will_be_scored)
+      ) {
+        log(`🏁 Auto joining session: ${joinProps.registrationStatus.subsession_id}`);
+        joinBtn.click();
+      } else {
+        log(`⛔ Not joining unscored session: ${joinProps.registrationStatus.subsession_id}`);
+      }
+    } else {
+      log(`⛔ Already joined ${lastJoined} once, skipping`);
+    }
+  }, { signal });
+
+  // Monitor for session transitions (sim running)
+  const intervalId = setInterval(() => {
+    const regBarEl = $(regBarSelector);
+    if (regBarEl) {
+      const regBarProps = findProps(regBarEl);
+      const lastJoined = parseInt(localStorage.getItem('iref_last_joined') || '0');
+
+      if (
+        regBarProps?.simStatus?.status === 'Sim Running' &&
+        regBarProps?.registrationStatus?.subsession_id !== lastJoined
+      ) {
+        log(
+          `🏁 Session transition detected, last session is now ${regBarProps.registrationStatus.subsession_id}`
+        );
+        localStorage.setItem(
+          'iref_last_joined',
+          regBarProps.registrationStatus.subsession_id
+        );
+      }
+    }
+  }, 1000);
+
+  // Cleanup interval on abort
+  signal.addEventListener('abort', () => {
+    clearInterval(intervalId);
+  });
 }
 
-setInterval(() => {
-  if ($(regBarSelector)) {
-    const regBarProps = findProps($(regBarSelector));
-    let lastJoined = parseInt(localStorage.getItem("iref_last_joined"));
-
-    if (
-      regBarProps.simStatus.status == "Sim Running" &&
-      regBarProps.registrationStatus.subsession_id !== lastJoined
-    ) {
-      log(
-        `🏁 Session transition detected, last session is now ${regBarProps.registrationStatus.subsession_id}`
-      );
-      localStorage.setItem(
-        "iref_last_joined",
-        regBarProps.registrationStatus.subsession_id
-      );
-    }
-  }
-}, 1000);
-
-const id = getFeatureID(import.meta.url);
-const bodyClass = "iref-" + id;
-
-features.add(id, true, selector, bodyClass, init);
+void features.add('auto-join', {
+  init
+});

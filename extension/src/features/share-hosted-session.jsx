@@ -1,5 +1,5 @@
-import { getFeatureID } from '../helpers/feature-helpers.js';
 import features from '../feature-manager.js';
+import { observe } from '../helpers/selector-observer.js';
 import { findReact } from '../helpers/react-resolver.js';
 import './share-hosted-session.css';
 import React from 'dom-chef';
@@ -7,13 +7,10 @@ import { $ } from 'select-dom';
 
 const selector = '#create-race-modal';
 
-async function initHostedSession(activate = true) {
-
-    if (!activate) {
-        return;
-    }
-
-    const modalState = findReact($(selector), 1, "state");
+function init(signal) {
+  // Watch for hosted session modal appearance
+  observe(selector, (modalEl) => {
+    const modalState = findReact(modalEl, 1, "state");
 
     const getJsonUpload = () =>
         new Promise(resolve => {
@@ -81,11 +78,10 @@ async function initHostedSession(activate = true) {
         </div>
     );
 
-    $(selector).querySelector('.modal-footer .centered-horizontal').prepend(buttonEl);
-
+    modalEl.querySelector('.modal-footer .centered-horizontal').prepend(buttonEl);
+  }, { signal });
 }
 
-const id = getFeatureID(import.meta.url);
-const bodyClass = 'iref-' + id;
-
-features.add(id, true, selector, bodyClass, initHostedSession);
+void features.add('share-hosted-session', {
+  init
+});

@@ -1,11 +1,9 @@
-import { getFeatureID } from '../helpers/feature-helpers.js';
+/**
+ * No Toasts - Hide all notification toasts
+ * CSS-only feature
+ */
+
 import features from '../feature-manager.js';
 import './no-toasts.css';
 
-const id = getFeatureID(import.meta.url);
-
-const selector = '#chakra-toast-manager-top';
-
-const bodyClass = 'iref-' + id;
-
-features.add(id, true, selector, bodyClass);
+void features.addCssFeature('no-toasts');

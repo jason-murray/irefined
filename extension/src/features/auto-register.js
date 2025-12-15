@@ -1,15 +1,18 @@
-import { getFeatureID } from "../helpers/feature-helpers.js";
 import { log } from "./logger.js";
 import features from "../feature-manager.js";
+import { observe } from "../helpers/selector-observer.js";
 import { findProps, findState } from "../helpers/react-resolver.js";
 import { $, $$ } from "select-dom";
 import ws from "../helpers/websockets.js";
 import "./auto-register.css";
 
 const selector = 'a.active[href*="go-racing"]';
-let persistInterval = 0;
 
-window.watchQueue = [];
+// Queue is now managed by Vue Pinia store, but we keep window.watchQueue for backwards compatibility
+// The queue-bridge.js will sync this with the Pinia store
+if (!window.watchQueue) {
+  window.watchQueue = [];
+}
 
 function checkSession(session, queueItem) {
   if (queueItem.status !== "queued") {
@@ -151,13 +154,10 @@ function addToQueue(e) {
   );
 }
 
-async function init(activate = true) {
-  if (!activate) {
-    clearInterval(persistInterval);
-    return;
-  }
-
-  persistInterval = setInterval(() => {
+function init(signal) {
+  // Watch for go-racing page
+  observe(selector, () => {
+    const intervalId = setInterval(() => {
     let disabledRegButtons = $$(".chakra-table a.btn-success.disabled");
 
     if (!disabledRegButtons) {
@@ -202,9 +202,14 @@ async function init(activate = true) {
       });
     }
   }, 300);
+
+    // Cleanup interval on abort
+    signal.addEventListener('abort', () => {
+      clearInterval(intervalId);
+    });
+  }, { signal });
 }
 
-const id = getFeatureID(import.meta.url);
-const bodyClass = "iref-" + id;
-
-features.add(id, true, selector, bodyClass, init);
+void features.add('auto-register', {
+  init
+});
